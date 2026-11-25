@@ -1,0 +1,16 @@
+experiment_name: mlp_concise
+description: "D2L 4.3 多层感知机的简洁实现 (Fashion-MNIST)"
+source_url: "https://zh-v2.d2l.ai/chapter_multilayer-perceptrons/mlp-concise.html"
+
+model:
+  input_dim: 784
+  hidden_dim: 256
+  output_dim: 10
+  init_std: 0.01
+
+training:
+  batch_size: 256
+  lr: 0.1
+  num_epochs: 10
+  seed: 42
+  num_workers: 2

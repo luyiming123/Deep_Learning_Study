@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Datasets & large model artifacts (sync via Google Drive instead of Git)
+data/
+*.pt
+*.pth
+*.ckpt
+*.bin
+*.safetensors
+*.onnx
+*.h5
+
+# Logs & temporary files
+*.log
+.DS_Store
+Thumbs.db
+
+# Secrets / local env
+.env
+.env.local
