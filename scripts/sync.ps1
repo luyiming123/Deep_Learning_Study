@@ -4,9 +4,18 @@
 
 $ErrorActionPreference = "Stop"
 
+$GitExe = "git"
+$ScoopGitRoot = Join-Path $env:USERPROFILE "scoop\apps\git\current"
+$ScoopGitCmd = Join-Path $ScoopGitRoot "cmd\git.exe"
+$ScoopGitUsrBin = Join-Path $ScoopGitRoot "usr\bin"
+if ((Test-Path $ScoopGitCmd) -and (Test-Path $ScoopGitUsrBin)) {
+    $GitExe = $ScoopGitCmd
+    $env:PATH = "$ScoopGitUsrBin;$env:PATH"
+}
+
 function Invoke-Git {
     param([string[]]$GitArgs)
-    & git @GitArgs
+    & $GitExe @GitArgs
     if ($LASTEXITCODE -ne 0) {
         throw "git $($GitArgs -join ' ') failed with exit code $LASTEXITCODE"
     }
@@ -21,13 +30,13 @@ if (-not (Test-Path ".git")) {
     exit 1
 }
 
-$Branch = (git branch --show-current 2>$null).Trim()
+$Branch = (& $GitExe branch --show-current 2>$null).Trim()
 if ([string]::IsNullOrWhiteSpace($Branch)) {
     $Branch = "main"
 }
 
 # Check if origin remote is configured
-$null = git remote get-url origin 2>$null
+$null = & $GitExe remote get-url origin 2>$null
 if ($LASTEXITCODE -ne 0) {
     Write-Host "[WARN] 尚未配置 GitHub 远程仓库 (origin)。" -ForegroundColor Yellow
     Write-Host "请先运行：" -ForegroundColor Cyan
@@ -37,10 +46,10 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 # Stage & commit local changes if any
-$Status = git status --porcelain
+$Status = & $GitExe status --porcelain
 if ($Status) {
-    $GitName = (git config user.name 2>$null)
-    $GitEmail = (git config user.email 2>$null)
+    $GitName = (& $GitExe config user.name 2>$null)
+    $GitEmail = (& $GitExe config user.email 2>$null)
     if ([string]::IsNullOrWhiteSpace($GitName) -or [string]::IsNullOrWhiteSpace($GitEmail)) {
         Write-Host "[ERROR] Git 尚未配置用户名或邮箱，无法提交。" -ForegroundColor Red
         Write-Host "请先执行以下两条命令（只需配置一次）：" -ForegroundColor Yellow
@@ -61,7 +70,7 @@ if ($Status) {
 }
 
 # Pull remote updates (e.g., results pushed from Colab) if remote branch exists
-$RemoteBranchExists = git ls-remote --heads origin $Branch
+$RemoteBranchExists = & $GitExe ls-remote --heads origin $Branch
 if ($LASTEXITCODE -ne 0) {
     throw "无法连接到远程仓库 origin，请检查网络或代理设置。"
 }
